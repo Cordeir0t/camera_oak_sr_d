@@ -1,64 +1,94 @@
-````md
-# OAK-D SR - Sistema de Medição por Profundidade
+```md
+# OAK-D SR — Sistema Industrial de Medição por Profundidade
 
-> Sistema de visão computacional utilizando câmera Luxonis OAK-D Short Range para medição de espessura em tempo real.
-
-## Sobre o Projeto
-
-Este projeto utiliza a câmera OAK-D SR com a biblioteca DepthAI para realizar medições de profundidade em superfícies como:
-
-- Espuma  
-- Cola em vidro  
-- Materiais translúcidos  
-
-A captura é realizada via visão estéreo, com processamento de mapa de profundidade e visualização em tempo real com OpenCV.
-
-Range ideal de operação: 30 cm — 1 m.
+Sistema de visão computacional para medição de espessura e análise dimensional em tempo real utilizando a câmera **Luxonis OAK-D Short Range** e a biblioteca **:contentReference[oaicite:1]{index=1}**.
 
 ---
 
-## Especificações OAK-D SR
+## 1. Visão Geral
 
-| Parâmetro   | Especificação        |
-| ----------- | -------------------- |
-| Sensor      | OV9782(estéreo + cor)|
-| Resolução   | 1 MP (1280x800)      |
-| FPS Máx     | 120 fps (800p)       |
-| DFOV        | 89.5°                |
-| Baseline    | 20 mm                |
-| Foco        | 20 cm — ∞            |
-| Abertura    | F# 2.0 ±5%           |
-| Focal       | 2.35 mm              |
-| Pixel Size  | 3 µm                 |
-| Shutter     | Global               |
-| Processador | 4 TOPS (1.4 AI)      |
-| Dimensões   | 56 × 36 × 25.5 mm    |
-| Peso        | 72 g                 |
+Este projeto implementa um pipeline estéreo para geração de mapa de profundidade (Depth Map) e cálculo de espessura em superfícies com diferentes propriedades ópticas, incluindo:
 
+- Espumas técnicas  
+- Aplicação de cola sobre vidro  
+- Materiais translúcidos ou semitransparentes  
 
+A aquisição é realizada por visão estéreo ativa, com processamento embarcado no dispositivo (Myriad X) e visualização em tempo real via **:contentReference[oaicite:2]{index=2}**.
 
-## Requisitos
+**Faixa operacional recomendada:**  
+30 cm — 1,0 m  
+**Faixa ideal para medições de alta precisão:**  
+30 cm — 50 cm  
+
+---
+
+## 2. Especificações Técnicas — OAK-D SR
+
+| Parâmetro      | Especificação                  |
+|---------------|--------------------------------|
+| Sensor        | OV9782 (Estéreo + RGB)         |
+| Resolução     | 1 MP (1280 × 800)              |
+| FPS Máx       | 120 fps (800p)                 |
+| DFOV          | 89.5°                          |
+| Baseline      | 20 mm                          |
+| Foco          | 20 cm — ∞                      |
+| Abertura      | F# 2.0 ±5%                     |
+| Distância Focal | 2.35 mm                     |
+| Pixel Size    | 3 µm                           |
+| Shutter       | Global                         |
+| Processador   | 4 TOPS (1.4 TOPS AI)           |
+| Dimensões     | 56 × 36 × 25.5 mm              |
+| Peso          | 72 g                           |
+
+---
+
+## 3. Arquitetura do Sistema
+
+### Pipeline DepthAI
+
+```
+
+LEFT Camera  ──┐
+├── StereoDepth ── Disparity / Depth Map ── XLinkOut
+RIGHT Camera ──┘
+
+````
+
+### Configuração do Estéreo
+
+- MonoCamera LEFT / RIGHT — 400p  
+- StereoDepth:
+  - Preset: `SHORT_RANGE`
+  - Median Filter: `KERNEL_7x7`
+  - Confidence Threshold: 180  
+  - Depth alignment configurável  
+
+---
+
+## 4. Requisitos
 
 ### Hardware
+
 - OAK-D SR  
-- Cabo USB-C 3.0  
-- PC com USB 3.0  
+- Cabo USB-C 3.0 (recomendado alta qualidade)  
+- PC com USB 3.0 nativo  
 
 ### Software
-- Python 3.11
-- venv  
 
+- Python 3.11  
+- Ambiente virtual (venv)
 
+---
 
-## Dependências
+## 5. Dependências
 
 ```bash
 pip install depthai opencv-python numpy pandas
 ````
 
+---
 
-
-## Instalação
+## 6. Instalação
 
 ```bash
 git clone https://github.com/Cordeir0t/camera_oak_sr_d.git
@@ -74,7 +104,7 @@ pip install -r requirements.txt
 
 ---
 
-## Execução
+## 7. Execução
 
 ```bash
 python oak.py
@@ -86,17 +116,19 @@ ou
 python oakd_sr_inspect_glass.py
 ```
 
-Controles:
+### Controles
 
-* SPACE = Selecionar ROI
-* S = Salvar medição
-* R = Reset
-* T = Toggle Depth View
-* Q = Sair
+| Tecla | Função                         |
+| ----- | ------------------------------ |
+| SPACE | Selecionar ROI                 |
+| S     | Salvar medição                 |
+| R     | Resetar ROI                    |
+| T     | Alternar visualização de Depth |
+| Q     | Encerrar aplicação             |
 
 ---
 
-## Estrutura do Projeto
+## 8. Estrutura do Projeto
 
 ```
 ├── oak.py
@@ -109,50 +141,40 @@ Controles:
 
 ---
 
-## Pipeline DepthAI
+## 9. Diretrizes Operacionais
 
-```
-LEFT Camera  ──┐
-               ├── StereoDepth ── Disparity / Depth Map ── XLinkOut
-RIGHT Camera ──┘
-```
+Para garantir maior estabilidade e repetibilidade metrológica:
 
-Configuração Stereo:
-
-* MonoCamera LEFT / RIGHT (400p)
-* StereoDepth:
-
-  * Modo: SHORT_RANGE
-  * Median Filter: KERNEL_7x7
-  * Confidence Threshold: 180
+* Manter distância constante entre 30–50 cm
+* Utilizar iluminação difusa e homogênea
+* Aplicar spray fosco em superfícies altamente refletivas
+* Evitar luz solar direta
+* Utilizar cabo USB 3.0 certificado
 
 ---
 
-## Dicas de Uso
+## 10. Ambiente Validado
 
-Distância ideal: 30 — 50 cm
-Superfícies lisas devem receber spray fosco para melhorar textura
-Utilizar cabo USB 3.0 para evitar perda de frames
+| Componente | Versão       | Verificação              |
+| ---------- | ------------ | ------------------------ |
+| Python     | 3.11.9       | `python --version`       |
+| DepthAI    | 2.24.0.0     | `pip show depthai`       |
+| OpenCV     | 4.x          | `pip show opencv-python` |
+| NumPy      | 1.26.4       | `pip show numpy`         |
+| Ambiente   | oak-venv-224 | `pip list`               |
 
-### Requerimentos 
-
-| Componente | Versão Atual       | Comando para Verificar |
-| ---------- | ------------------ | ---------------------- |
-| Python     | 3.11.9             | python --version       |
-| DepthAI    | 2.24.0.0           | pip show depthai       |
-| OpenCV     | 4.x (cv2)          | pip show opencv-python |
-| NumPy      |  1.26.4            | pip show numpy         |
-| Ambiente   | oak-venv-224       | pip list               |
 ---
 
-## Troubleshooting
+## 11. Troubleshooting
 
-| Problema               | Solução                                |
-| ---------------------- | -------------------------------------- |
-| Tela preta             | Aproximar objeto e melhorar iluminação |
-| Poucos pixels de depth | Aumentar textura da superfície         |
-| AttributeError         | Atualizar DepthAI                      |
-| Frames dropados        | Verificar cabo USB 3.0                 |
+| Problema              | Possível Causa          | Solução                |
+| --------------------- | ----------------------- | ---------------------- |
+| Tela preta            | Objeto fora do range    | Ajustar distância      |
+| Poucos pixels válidos | Superfície sem textura  | Aplicar spray fosco    |
+| AttributeError        | Versão incompatível SDK | Atualizar DepthAI      |
+| Queda de frames       | Gargalo USB             | Verificar cabo USB 3.0 |
+
+Atualização do SDK:
 
 ```bash
 pip install --upgrade depthai
@@ -160,21 +182,28 @@ pip install --upgrade depthai
 
 ---
 
-## Links Úteis
+## 12. Documentação Oficial
 
-[https://docs.luxonis.com](https://docs.luxonis.com)
-[https://docs.luxonis.com/hardware/products/OAK-D-SR](https://docs.luxonis.com/hardware/products/OAK-D-SR)
+* [https://docs.luxonis.com](https://docs.luxonis.com)
+* [https://docs.luxonis.com/hardware/products/OAK-D-SR](https://docs.luxonis.com/hardware/products/OAK-D-SR)
+
+---
+
+## 13. Aplicações
+
+* Inspeção industrial de espessura
+* Controle de qualidade em linha
+* Medição de aplicação de adesivo
+* Análise de superfícies translúcidas
+
+---
 
 ## Autor
 
-Projeto desenvolvido para aplicações industriais de visão computacional.
-
-Talita Cordeiro Teixeira.
+Talita Cordeiro Teixeira
+Projeto desenvolvido para aplicações industriais de visão computacional com foco em inspeção dimensional em tempo real.
 
 ```
+
+Se desejar, posso adaptar para um padrão mais corporativo (ex: formato para portfólio técnico, apresentação para banca de TCC ou documentação estilo ISO/industrial).
 ```
-
-
-
-
-
