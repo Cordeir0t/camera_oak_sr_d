@@ -45,7 +45,7 @@ Range ideal de operação: 30 cm — 1 m.
 - PC com USB 3.0  
 
 ### Software
-- Python 3.10+  
+- Python 3.11
 - venv  
 
 
@@ -173,6 +173,7 @@ Talita Cordeiro Teixeira.
 
 ```
 ```
+
 
 
 
