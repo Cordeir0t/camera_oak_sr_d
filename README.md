@@ -134,6 +134,15 @@ Distância ideal: 30 — 50 cm
 Superfícies lisas devem receber spray fosco para melhorar textura
 Utilizar cabo USB 3.0 para evitar perda de frames
 
+### Requerimentos 
+
+| Componente | Versão Atual       | Comando para Verificar |
+| ---------- | ------------------ | ---------------------- |
+| Python     | 3.11.9             | python --version       |
+| DepthAI    | 2.24.0.0           | pip show depthai       |
+| OpenCV     | 4.x (cv2)          | pip show opencv-python |
+| NumPy      |  1.26.4            | pip show numpy         |
+| Ambiente   | oak-venv-224       | pip list               |
 ---
 
 ## Troubleshooting
@@ -162,4 +171,5 @@ Projeto desenvolvido para aplicações industriais de visão computacional.
 
 ```
 ```
+
 
