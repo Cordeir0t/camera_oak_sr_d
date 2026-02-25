@@ -1,209 +1,213 @@
-```md
-# OAK-D SR — Sistema Industrial de Medição por Profundidade
+# OAK-D SR — Sistema de Inspeção Industrial com Visão Estéreo
 
-Sistema de visão computacional para medição de espessura e análise dimensional em tempo real utilizando a câmera **Luxonis OAK-D Short Range** e a biblioteca **:contentReference[oaicite:1]{index=1}**.
+Sistema de inspeção industrial desenvolvido com a câmera **OAK-D SR**, utilizando o SDK **DepthAI**, voltado para aplicações de controle de qualidade baseadas em análise de profundidade em tempo real.
+
+O projeto implementa processamento embarcado de visão estéreo para medição dimensional, detecção de irregularidades superficiais e validação automática de critérios técnicos de produção.
+
+Repositório:
+[https://github.com/Cordeir0t/camera_oak_sr_d](https://github.com/Cordeir0t/camera_oak_sr_d)
 
 ---
 
 ## 1. Visão Geral
 
-Este projeto implementa um pipeline estéreo para geração de mapa de profundidade (Depth Map) e cálculo de espessura em superfícies com diferentes propriedades ópticas, incluindo:
+A solução utiliza visão estéreo ativa para gerar mapas de disparidade e extrair métricas quantitativas de inspeção. O sistema foi projetado com foco em:
 
-- Espumas técnicas  
-- Aplicação de cola sobre vidro  
-- Materiais translúcidos ou semitransparentes  
+* Estabilidade temporal da profundidade
+* Robustez contra ruído e falhas de textura
+* Processamento em tempo real
+* Estrutura modular para expansão industrial
 
-A aquisição é realizada por visão estéreo ativa, com processamento embarcado no dispositivo (Myriad X) e visualização em tempo real via **:contentReference[oaicite:2]{index=2}**.
+Principais aplicações implementadas:
 
-**Faixa operacional recomendada:**  
-30 cm — 1,0 m  
-**Faixa ideal para medições de alta precisão:**  
-30 cm — 50 cm  
-
----
-
-## 2. Especificações Técnicas — OAK-D SR
-
-| Parâmetro      | Especificação                  |
-|---------------|--------------------------------|
-| Sensor        | OV9782 (Estéreo + RGB)         |
-| Resolução     | 1 MP (1280 × 800)              |
-| FPS Máx       | 120 fps (800p)                 |
-| DFOV          | 89.5°                          |
-| Baseline      | 20 mm                          |
-| Foco          | 20 cm — ∞                      |
-| Abertura      | F# 2.0 ±5%                     |
-| Distância Focal | 2.35 mm                     |
-| Pixel Size    | 3 µm                           |
-| Shutter       | Global                         |
-| Processador   | 4 TOPS (1.4 TOPS AI)           |
-| Dimensões     | 56 × 36 × 25.5 mm              |
-| Peso          | 72 g                           |
+1. Inspeção de faixas de cola em vidro
+2. Inspeção de defeitos superficiais em rodas automotivas
 
 ---
 
-## 3. Arquitetura do Sistema
+## 2. Arquitetura Técnica
 
-### Pipeline DepthAI
+### Pipeline de Visão
 
-```
+* MonoCamera esquerda — 400p @ 30 FPS
+* MonoCamera direita — 400p @ 30 FPS
+* StereoDepth (Preset: HIGH_DENSITY)
+* Pós-processamento configurado para ambiente industrial:
 
-LEFT Camera  ──┐
-├── StereoDepth ── Disparity / Depth Map ── XLinkOut
-RIGHT Camera ──┘
+  * Left-Right Check
+  * Extended Disparity
+  * Median Filter 7x7
+  * Temporal Filter com persistência VALID_2_IN_LAST_4
+  * Spatial Filter com fechamento de lacunas
+  * Threshold de faixa de profundidade
 
-````
+Fluxo de processamento:
 
-### Configuração do Estéreo
-
-- MonoCamera LEFT / RIGHT — 400p  
-- StereoDepth:
-  - Preset: `SHORT_RANGE`
-  - Median Filter: `KERNEL_7x7`
-  - Confidence Threshold: 180  
-  - Depth alignment configurável  
-
----
-
-## 4. Requisitos
-
-### Hardware
-
-- OAK-D SR  
-- Cabo USB-C 3.0 (recomendado alta qualidade)  
-- PC com USB 3.0 nativo  
-
-### Software
-
-- Python 3.11  
-- Ambiente virtual (venv)
+Mono L + Mono R
+→ StereoDepth
+→ Disparidade
+→ Normalização por percentis
+→ Suavização e filtros espaciais
+→ Extração de características
+→ Métricas quantitativas
+→ Interface com HUD técnico
 
 ---
 
-## 5. Dependências
+## 3. Projeto 1 — Inspeção de Faixas de Cola em Vidro
 
-```bash
-pip install depthai opencv-python numpy pandas
-````
+Arquivo principal:
+oakd_sr_inspect_glass_v4.py
 
----
+### Objetivo
 
-## 6. Instalação
+Validar automaticamente a aplicação de faixas de cola em vidro com base em critérios quantitativos:
 
-```bash
-git clone https://github.com/Cordeir0t/camera_oak_sr_d.git
-cd camera_oak_sr_d
+* Percentual de cobertura
+* Número de faixas detectadas
+* Espessura real das faixas
+* Orientação geométrica
+* Score final ponderado
 
-python -m venv .venv
+### Metodologia
 
-# Windows
-.\.venv\Scripts\activate
+1. Realce da imagem mono
 
-pip install -r requirements.txt
-```
+   * CLAHE (Equalização adaptativa)
+   * Detecção de bordas via Canny
+   * Filtro passa-alta para reforço estrutural
 
----
+2. Extração das regiões candidatas
 
-## 7. Execução
+   * Dilatação horizontal
+   * Operações morfológicas de limpeza
+   * Filtro por área relativa
 
-```bash
-python oak.py
-```
+3. Medição de espessura real
 
-ou
+   * Projeção vertical da máscara binária
+   * Bounding box da maior faixa
+   * Espessura final definida pelo menor valor entre:
 
-```bash
-python oakd_sr_inspect_glass.py
-```
+     * Altura da bounding box
+     * Espessura projetada
 
-### Controles
+### Critérios Técnicos
 
-| Tecla | Função                         |
-| ----- | ------------------------------ |
-| SPACE | Selecionar ROI                 |
-| S     | Salvar medição                 |
-| R     | Resetar ROI                    |
-| T     | Alternar visualização de Depth |
-| Q     | Encerrar aplicação             |
+Cobertura aceitável:
+0,5% a 3,0% da área total
 
----
+Número de faixas:
+1 a 6
 
-## 8. Estrutura do Projeto
+Espessura válida:
+8 a 25 pixels
 
-```
-├── oak.py
-├── oakd_sr_inspect_glass.py
-├── img/
-├── medicoes/
-├── requirements.txt
-└── README.md
-```
+### Score de Qualidade
 
----
+Peso dos critérios:
 
-## 9. Diretrizes Operacionais
+* Cobertura: 50%
+* Número de faixas: 30%
+* Espessura: 20%
 
-Para garantir maior estabilidade e repetibilidade metrológica:
+Classificação:
 
-* Manter distância constante entre 30–50 cm
-* Utilizar iluminação difusa e homogênea
-* Aplicar spray fosco em superfícies altamente refletivas
-* Evitar luz solar direta
-* Utilizar cabo USB 3.0 certificado
+* Score ≥ 90: OK
+* 70 ≤ Score < 90: AVISO
+* Score < 70: FAIL
+
+O sistema gera feedback visual e métrico em tempo real, permitindo integração futura com CLP ou sistema supervisório.
 
 ---
 
-## 10. Ambiente Validado
+## 4. Projeto 2 — Inspeção de Defeitos em Roda Automotiva
 
-| Componente | Versão       | Verificação              |
-| ---------- | ------------ | ------------------------ |
-| Python     | 3.11.9       | `python --version`       |
-| DepthAI    | 2.24.0.0     | `pip show depthai`       |
-| OpenCV     | 4.x          | `pip show opencv-python` |
-| NumPy      | 1.26.4       | `pip show numpy`         |
-| Ambiente   | oak-venv-224 | `pip list`               |
+Arquivo principal:
+oakd_sr_inspect_rodas.py
 
----
+### Objetivo
 
-## 11. Troubleshooting
+Detectar irregularidades superficiais em rodas automotivas por meio de variação local de profundidade.
 
-| Problema              | Possível Causa          | Solução                |
-| --------------------- | ----------------------- | ---------------------- |
-| Tela preta            | Objeto fora do range    | Ajustar distância      |
-| Poucos pixels válidos | Superfície sem textura  | Aplicar spray fosco    |
-| AttributeError        | Versão incompatível SDK | Atualizar DepthAI      |
-| Queda de frames       | Gargalo USB             | Verificar cabo USB 3.0 |
+### Estratégia de Detecção
 
-Atualização do SDK:
+1. Normalização por percentis
+   Ajusta o contraste apenas aos valores válidos da cena.
 
-```bash
-pip install --upgrade depthai
-```
+2. Suavização preservando bordas
 
----
+   * Bilateral Filter
+   * Fechamento morfológico
 
-## 12. Documentação Oficial
+3. Extração de gradiente de profundidade
 
-* [https://docs.luxonis.com](https://docs.luxonis.com)
-* [https://docs.luxonis.com/hardware/products/OAK-D-SR](https://docs.luxonis.com/hardware/products/OAK-D-SR)
+   * Sobel X e Sobel Y
+   * Magnitude do gradiente
+   * CLAHE aplicado ao gradiente
+
+4. Threshold adaptativo
+   Isola regiões com variação abrupta de profundidade, associadas a possíveis defeitos.
+
+5. Modo BLEND
+   Sobreposição do mapa de defeitos ao mapa de profundidade para inspeção técnica detalhada.
 
 ---
 
-## 13. Aplicações
+## 5. Cálculo de Distância
 
-* Inspeção industrial de espessura
-* Controle de qualidade em linha
-* Medição de aplicação de adesivo
-* Análise de superfícies translúcidas
+A distância é estimada a partir da mediana da disparidade em uma ROI central:
+
+dist_cm ≈ (baseline × focal) / disparidade
+
+Implementação aproximada no código:
+
+dist_cm ≈ (460 × 2) / disparidade
+
+O valor é limitado ao intervalo operacional de 0 a 999 cm.
 
 ---
 
-## Autor
+## 6. Tecnologias Utilizadas
 
-Talita Cordeiro Teixeira
-Projeto desenvolvido para aplicações industriais de visão computacional com foco em inspeção dimensional em tempo real.
+* Python 3.11
+* OpenCV
+* NumPy
+* DepthAI SDK
+* OAK-D SR
 
-```
+Instalação:
 
-Se desejar, posso adaptar para um padrão mais corporativo (ex: formato para portfólio técnico, apresentação para banca de TCC ou documentação estilo ISO/industrial).
-```
+pip install depthai opencv-python numpy
+
+---
+
+## 7. Aplicações Industriais Potenciais
+
+* Controle de qualidade em linha de produção
+* Validação de aplicação de adesivos industriais
+* Inspeção dimensional baseada em profundidade
+* Detecção de irregularidades superficiais
+* Monitoramento automatizado de conformidade
+
+---
+
+## 8. Diferenciais Técnicos
+
+* Processamento em tempo real
+* Métrica quantitativa automatizada
+* Filtros temporais para estabilidade industrial
+* Redução de ruído por filtros espaciais e percentis
+* Estrutura modular para expansão
+* Arquitetura preparada para integração com sistemas industriais
+
+---
+
+## 9. Autoria
+
+Talita Cordeiro
+
+
+---
+
+
