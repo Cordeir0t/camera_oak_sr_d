@@ -1,0 +1,20 @@
+﻿# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Arquivos grandes
+*.mp4
+*.png
+*.jpg
+*.avi
+
+# Windows  
+desktop.ini
+Thumbs.db
+
+# Sub-repos (opcional)
+oak/
