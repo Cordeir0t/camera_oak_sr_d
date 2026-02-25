@@ -169,7 +169,10 @@ pip install --upgrade depthai
 
 Projeto desenvolvido para aplicações industriais de visão computacional.
 
+Talita Cordeiro Teixeira.
+
 ```
 ```
+
 
 
