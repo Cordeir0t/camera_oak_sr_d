@@ -21,21 +21,21 @@ Range ideal de operação: 30 cm — 1 m.
 
 | Parâmetro | Especificação |
 |---|---|
-| Sensor | OV9782 (estéreo + cor) |
-| Resolução | 1 MP (1280x800) |
-| FPS Máx | 120 fps (800p) |
-| DFOV | 89.5° |
-| Baseline | 20 mm |
-| Foco | 20 cm — ∞ |
-| Abertura | F# 2.0 ±5% |
-| Focal | 2.35 mm |
-| Pixel Size | 3 µm |
-| Shutter | Global |
-| Processador | 4 TOPS (1.4 AI) |
-| Dimensões | 56 × 36 × 25.5 mm |
-| Peso | 72 g |
+| Sensor      | OV9782(estéreo + cor)|
+| Resolução   | 1 MP (1280x800)      |
+| FPS Máx     | 120 fps (800p)       |
+| DFOV        | 89.5°                |
+| Baseline    | 20 mm                |
+| Foco        | 20 cm — ∞            |
+| Abertura    | F# 2.0 ±5%           |
+| Focal       | 2.35 mm              |
+| Pixel Size  | 3 µm                 |
+| Shutter     | Global               |
+| Processador | 4 TOPS (1.4 AI)      |
+| Dimensões   | 56 × 36 × 25.5 mm    |
+| Peso        | 72 g                 |
 
----
+
 
 ## Requisitos
 
@@ -48,7 +48,7 @@ Range ideal de operação: 30 cm — 1 m.
 - Python 3.10+  
 - venv  
 
----
+
 
 ## Dependências
 
@@ -56,7 +56,7 @@ Range ideal de operação: 30 cm — 1 m.
 pip install depthai opencv-python numpy pandas
 ````
 
----
+
 
 ## Instalação
 
@@ -162,3 +162,4 @@ Projeto desenvolvido para aplicações industriais de visão computacional.
 
 ```
 ```
+
