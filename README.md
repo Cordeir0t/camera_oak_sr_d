@@ -19,8 +19,8 @@ Range ideal de operação: 30 cm — 1 m.
 
 ## Especificações OAK-D SR
 
-| Parâmetro | Especificação |
-|---|---|
+| Parâmetro   | Especificação        |
+| ----------- | -------------------- |
 | Sensor      | OV9782(estéreo + cor)|
 | Resolução   | 1 MP (1280x800)      |
 | FPS Máx     | 120 fps (800p)       |
@@ -173,6 +173,7 @@ Talita Cordeiro Teixeira.
 
 ```
 ```
+
 
 
 
